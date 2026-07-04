@@ -1,0 +1,52 @@
+name: 天淘小分队
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+    - cron: '30 2 * * 1'
+  workflow_dispatch:
+    inputs:
+      reminder:
+        description: Which reminder to send
+        required: true
+        default: store-ranking
+        type: choice
+        options:
+          - store-ranking
+          - weekly-report
+          - both
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send store ranking reminder
+        if: (github.event_name == 'schedule' && github.event.schedule == '0 2 * * *') || (github.event_name == 'workflow_dispatch' && (inputs.reminder == 'store-ranking' || inputs.reminder == 'both'))
+        env:
+          WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
+        run: |
+          curl --silent --show-error --fail \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "msgtype": "text",
+              "text": {
+                "content": "店铺排名发一下\n@韦帅康\n@于伟伦\n@李宏涛"
+              }
+            }' \
+            "$WECOM_WEBHOOK_URL"
+
+      - name: Send weekly report reminder
+        if: (github.event_name == 'schedule' && github.event.schedule == '30 2 * * 1') || (github.event_name == 'workflow_dispatch' && (inputs.reminder == 'weekly-report' || inputs.reminder == 'both'))
+        env:
+          WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
+        run: |
+          curl --silent --show-error --fail \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "msgtype": "text",
+              "text": {
+                "content": "请准备好周报，包括超A。\n@所有人",
+                "mentioned_mobile_list": ["@all"]
+              }
+            }' \
+            "$WECOM_WEBHOOK_URL"
