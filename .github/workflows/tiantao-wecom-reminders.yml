@@ -27,28 +27,25 @@ jobs:
         env:
           WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
         run: |
-          curl --silent --show-error --fail \
-            -H 'Content-Type: application/json' \
-            -d '{
-              "msgtype": "text",
-              "text": {
-                "content": "店铺排名发一下\n@韦帅康\n@于伟伦\n@李宏涛"
-              }
-            }' \
-            "$WECOM_WEBHOOK_URL"
+          content=$(cat <<'EOF'
+          店铺排名发一下
+          @韦帅康
+          @于伟伦
+          @李宏涛
+          EOF
+          )
+          payload=$(jq -nc --arg content "$content" '{msgtype:"text",text:{content:$content}}')
+          curl --silent --show-error --fail -H 'Content-Type: application/json' -d "$payload" "$WECOM_WEBHOOK_URL"
 
       - name: Send weekly report reminder
         if: (github.event_name == 'schedule' && github.event.schedule == '30 10 * * 1') || (github.event_name == 'workflow_dispatch' && (inputs.reminder == 'weekly-report' || inputs.reminder == 'both'))
         env:
           WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
         run: |
-          curl --silent --show-error --fail \
-            -H 'Content-Type: application/json' \
-            -d '{
-              "msgtype": "text",
-              "text": {
-                "content": "请准备好周报，包括超A。\n@所有人",
-                "mentioned_mobile_list": ["@all"]
-              }
-            }' \
-            "$WECOM_WEBHOOK_URL"
+          content=$(cat <<'EOF'
+          请准备好周报，包括超A。
+          @所有人
+          EOF
+          )
+          payload=$(jq -nc --arg content "$content" '{msgtype:"text",text:{content:$content,mentioned_mobile_list:["@all"]}}')
+          curl --silent --show-error --fail -H 'Content-Type: application/json' -d "$payload" "$WECOM_WEBHOOK_URL"
