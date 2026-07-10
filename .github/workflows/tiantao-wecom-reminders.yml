@@ -2,8 +2,8 @@ name: 天淘小分队
 
 on:
   schedule:
-    - cron: '0 2 * * *'
-    - cron: '0 2 * * 1'
+    - cron: '7 2 * * *'
+    - cron: '7 2 * * 1'
   workflow_dispatch:
     inputs:
       reminder:
@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send store ranking reminder
-        if: (github.event_name == 'schedule' && github.event.schedule == '0 2 * * *') || (github.event_name == 'workflow_dispatch' && (inputs.reminder == 'store-ranking' || inputs.reminder == 'both'))
+        if: (github.event_name == 'schedule' && github.event.schedule == '7 2 * * *') || (github.event_name == 'workflow_dispatch' && (inputs.reminder == 'store-ranking' || inputs.reminder == 'both'))
         env:
           WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
         run: |
@@ -36,7 +36,7 @@ jobs:
           curl --silent --show-error --fail -H 'Content-Type: application/json' -d "$payload" "$WECOM_WEBHOOK_URL"
 
       - name: Send weekly report reminder
-        if: (github.event_name == 'schedule' && github.event.schedule == '0 2 * * 1') || (github.event_name == 'workflow_dispatch' && (inputs.reminder == 'weekly-report' || inputs.reminder == 'both'))
+        if: (github.event_name == 'schedule' && github.event.schedule == '7 2 * * 1') || (github.event_name == 'workflow_dispatch' && (inputs.reminder == 'weekly-report' || inputs.reminder == 'both'))
         env:
           WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
         run: |
